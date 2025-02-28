@@ -1,0 +1,351 @@
+:root {
+    --primary-color: #8a0303;
+    --bg-dark: #0f0f0f;
+    --bg-darker: #070707;
+    --text-color: #e0e0e0;
+    --danger-color: #ff2a2a;
+    --success-color: #2aff2a;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Courier New', monospace;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-color);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    flex: 1;
+}
+
+header {
+    text-align: center;
+    padding: 20px 0;
+    background-color: var(--bg-darker);
+    border-bottom: 3px solid var(--primary-color);
+    position: relative;
+}
+
+h1 {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+    text-shadow: 0 0 10px rgba(138, 3, 3, 0.5);
+}
+
+.header-warning {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    font-size: 0.7rem;
+    color: var(--danger-color);
+    animation: blink 2s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.main-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.section {
+    background-color: var(--bg-darker);
+    border: 1px solid #333;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.game-area {
+    display: none;
+    animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.config-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+label {
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #aaa;
+}
+
+input, select, button {
+    padding: 10px;
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    color: var(--text-color);
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+button {
+    background-color: var(--primary-color);
+    border: none;
+    text-transform: uppercase;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    padding: 12px;
+    letter-spacing: 1px;
+}
+
+button:hover {
+    background-color: #b50404;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+button:disabled {
+    background-color: #333;
+    cursor: not-allowed;
+}
+
+.loader {
+    display: none;
+    text-align: center;
+    padding: 20px;
+}
+
+.loader i {
+    font-size: 2rem;
+    color: var(--primary-color);
+    animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.level-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.level-number {
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.level-progress {
+    background-color: #1a1a1a;
+    height: 10px;
+    flex: 1;
+    margin: 0 20px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    background-color: var(--primary-color);
+    height: 100%;
+    width: 0%;
+    transition: width 0.5s;
+}
+
+.level-description {
+    font-style: italic;
+    margin-bottom: 20px;
+    padding: 15px;
+    border-left: 3px solid var(--primary-color);
+    background-color: rgba(138, 3, 3, 0.1);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.questions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.question {
+    border: 1px solid #333;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: rgba(15, 15, 15, 0.7);
+}
+
+.question-text {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.option {
+    padding: 10px;
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.option:hover {
+    background-color: #252525;
+}
+
+.option.selected {
+    border-color: var(--primary-color);
+}
+
+.option.correct {
+    border-color: var(--success-color);
+    background-color: rgba(42, 255, 42, 0.1);
+}
+
+.option.incorrect {
+    border-color: var(--danger-color);
+    background-color: rgba(255, 42, 42, 0.1);
+}
+
+.next-level {
+    display: none;
+    margin-top: 20px;
+}
+
+.door-animation {
+    height: 200px;
+    margin: 30px auto;
+    position: relative;
+    width: 150px;
+    overflow: hidden;
+    perspective: 500px;
+}
+
+.door {
+    background: linear-gradient(45deg, #1e1e1e, #2a2a2a);
+    border: 2px solid #333;
+    height: 100%;
+    position: absolute;
+    width: 100%;
+    transform-origin: left;
+    transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.door:before {
+    content: '';
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    width: 10px;
+    height: 20px;
+    background-color: #444;
+    transform: translateY(-50%);
+}
+
+.door-open {
+    transform: rotateY(-105deg);
+}
+
+.level-failed {
+    text-align: center;
+    margin-top: 20px;
+    color: var(--danger-color);
+    font-weight: bold;
+    display: none;
+}
+
+.restart-button {
+    background-color: #333;
+    margin-top: 15px;
+}
+
+.game-over {
+    text-align: center;
+    display: none;
+}
+
+.game-over h2 {
+    font-size: 2rem;
+    color: var(--success-color);
+    margin-bottom: 20px;
+}
+
+.game-stats {
+    text-align: left;
+    max-width: 300px;
+    margin: 0 auto;
+    margin-bottom: 30px;
+}
+
+.stats-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.error-message {
+    color: var(--danger-color);
+    margin-top: 10px;
+    text-align: center;
+    display: none;
+}
+
+.scary-flicker {
+    animation: flicker 5s infinite;
+}
+
+@keyframes flicker {
+    0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% {
+        opacity: 1;
+    }
+    20%, 21.999%, 63%, 63.999%, 65%, 69.999% {
+        opacity: 0.5;
+    }
+}
+
+footer {
+    text-align: center;
+    padding: 20px 0;
+    font-size: 0.8rem;
+    color: #555;
+    border-top: 1px solid #222;
+}

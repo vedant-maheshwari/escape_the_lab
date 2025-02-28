@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escape The Lab</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <header>
+        <div class="header-warning"><i class="fas fa-exclamation-triangle"></i> LABORATORY BREACH DETECTED</div>
+        <h1 class="scary-flicker">Escape The Lab</h1>
+        <p>Answer correctly... or be trapped forever</p>
+    </header>
+    
+    <div class="container">
+        <div class="main-sections">
+            <!-- Game Configuration Section -->
+            <div class="section" id="config-section">
+                <h2><i class="fas fa-flask"></i> Lab Experiment Setup</h2>
+                <div class="config-form">
+                    <div class="form-group">
+                        <label for="topic">Subject Area:</label>
+                        <input type="text" id="topic" placeholder="e.g. Biology, Chemistry, Physics..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="difficulty">Initial Difficulty:</label>
+                        <select id="difficulty">
+                            <option value="easy">Easy</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="questionsPerLevel">Questions Per Level:</label>
+                        <input type="number" id="questionsPerLevel" min="1" max="10" value="3">
+                    </div>
+                    <div class="form-group">
+                        <label for="totalLevels">Total Levels:</label>
+                        <input type="number" id="totalLevels" min="1" max="10" value="5">
+                    </div>
+                    <button id="start-game"><i class="fas fa-play"></i> Begin Escape</button>
+                </div>
+            </div>
+            
+            <!-- Loading Indicator -->
+            <div class="loader" id="loader">
+                <i class="fas fa-spinner"></i>
+                <p>Preparing the next lab challenge...</p>
+            </div>
+            
+            <!-- Game Area Section -->
+            <div class="section game-area" id="game-area">
+                <div class="level-info">
+                    <div class="level-number">
+                        <i class="fas fa-door-closed"></i>
+                        <span id="current-level">Level 1</span>
+                    </div>
+                    <div class="level-progress">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="level-number">
+                        <span id="remaining-questions">3 Questions</span>
+                    </div>
+                </div>
+                
+                <div class="level-description" id="level-description">
+                    The lights flicker as you enter the first laboratory room. Strange equipment lines the walls, and a faint hissing sound can be heard in the distance.
+                </div>
+                
+                <div class="questions-container" id="questions-container">
+                    <!-- Questions will be dynamically inserted here -->
+                </div>
+                
+                <div class="level-failed" id="level-failed">
+                    <p>You failed to escape this level!</p>
+                    <button class="restart-button" id="retry-level">Retry Level</button>
+                </div>
+                
+                <div class="door-animation" id="door-animation">
+                    <div class="door" id="door">
+                        <span id="door-text">LOCKED</span>
+                    </div>
+                </div>
+                
+                <div class="next-level" id="next-level">
+                    <button id="next-level-btn"><i class="fas fa-arrow-right"></i> Enter Next Lab</button>
+                </div>
+            </div>
+            
+            <!-- Game Over Section -->
+            <div class="section game-over" id="game-over">
+                <h2><i class="fas fa-trophy"></i> You Escaped!</h2>
+                <p>Congratulations! You've successfully escaped all laboratory chambers.</p>
+                
+                <div class="game-stats">
+                    <h3>Escape Statistics:</h3>
+                    <div class="stats-item">
+                        <span>Topic:</span>
+                        <span id="stats-topic">Physics</span>
+                    </div>
+                    <div class="stats-item">
+                        <span>Difficulty:</span>
+                        <span id="stats-difficulty">Medium</span>
+                    </div>
+                    <div class="stats-item">
+                        <span>Total Levels:</span>
+                        <span id="stats-levels">5</span>
+                    </div>
+                    <div class="stats-item">
+                        <span>Correct Answers:</span>
+                        <span id="stats-correct">12/15</span>
+                    </div>
+                    <div class="stats-item">
+                        <span>Time Taken:</span>
+                        <span id="stats-time">3:45</span>
+                    </div>
+                </div>
+                
+                <button id="play-again"><i class="fas fa-redo"></i> Play Again</button>
+            </div>
+            
+            <div class="error-message" id="error-message">
+                An error occurred. Please try again.
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        Escape The Lab &copy; 2025 | Subject Matter Knowledge Testing Facility
+    </footer>
+</body>
+</html>
