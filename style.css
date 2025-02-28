@@ -243,6 +243,15 @@ button:disabled {
     background-color: rgba(255, 42, 42, 0.1);
 }
 
+.explanation {
+    font-size: 0.9rem;
+    color: #bbb;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
 .next-level {
     display: none;
     margin-top: 20px;
@@ -252,8 +261,8 @@ button:disabled {
     height: 200px;
     margin: 30px auto;
     position: relative;
-    width: 150px;
-    overflow: hidden;
+    width: 150px; /* Restored original width */
+    overflow: hidden; /* Restored original overflow */
     perspective: 500px;
 }
 
@@ -264,7 +273,7 @@ button:disabled {
     position: absolute;
     width: 100%;
     transform-origin: left;
-    transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1); /* Restored original 1.5s duration */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -348,4 +357,25 @@ footer {
     font-size: 0.8rem;
     color: #555;
     border-top: 1px solid #222;
+}
+
+#quit-game {
+    background-color: #555;
+    margin-top: 15px;
+}
+
+#quit-game:hover {
+    background-color: #777;
+}
+
+#feedback {
+    color: var(--text-color);
+    font-size: 1rem;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+#progress-chart {
+    max-width: 600px;
+    margin: 20px auto;
 }

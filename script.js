@@ -10,19 +10,20 @@ let gameState = {
     totalAnswers: 0,
     questions: [],
     startTime: null,
-    levelFailureThreshold: 0.5 // Need 50% correct to pass
+    levelFailureThreshold: 0.5,
+    incorrectTopics: [],
+    performanceScore: 0
 };
 
-// DOM Elements - Get them when document is ready
+// DOM Elements
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize elements
     const configSection = document.getElementById('config-section');
     const gameArea = document.getElementById('game-area');
     const loader = document.getElementById('loader');
     const startButton = document.getElementById('start-game');
+    const quitGameBtn = document.getElementById('quit-game');
     const errorMessage = document.getElementById('error-message');
     const questionsContainer = document.getElementById('questions-container');
-    const levelDescription = document.getElementById('level-description');
     const currentLevelElement = document.getElementById('current-level');
     const remainingQuestionsElement = document.getElementById('remaining-questions');
     const progressFill = document.getElementById('progress-fill');
@@ -34,14 +35,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const retryLevelBtn = document.getElementById('retry-level');
     const gameOverSection = document.getElementById('game-over');
     const playAgainBtn = document.getElementById('play-again');
-
-    // Stats elements
     const statsTopic = document.getElementById('stats-topic');
     const statsDifficulty = document.getElementById('stats-difficulty');
     const statsLevels = document.getElementById('stats-levels');
     const statsCorrect = document.getElementById('stats-correct');
     const statsTime = document.getElementById('stats-time');
-    
+    const feedbackElement = document.getElementById('feedback');
+    const progressChart = document.getElementById('progress-chart');
+
     // Set default values
     document.getElementById('difficulty').value = 'medium';
     document.getElementById('questionsPerLevel').value = '3';
@@ -49,6 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Event Listeners
     startButton.addEventListener('click', startGame);
+    quitGameBtn.addEventListener('click', quitGame);
     nextLevelBtn.addEventListener('click', loadNextLevel);
     retryLevelBtn.addEventListener('click', retryLevel);
     playAgainBtn.addEventListener('click', resetGame);
@@ -57,22 +59,17 @@ document.addEventListener('DOMContentLoaded', function() {
     function showError(message) {
         errorMessage.textContent = message;
         errorMessage.style.display = 'block';
-        setTimeout(() => {
-            errorMessage.style.display = 'none';
-        }, 5000);
+        setTimeout(() => errorMessage.style.display = 'none', 5000);
     }
 
     // Update remaining questions counter
     function updateRemainingQuestions() {
         const remaining = gameState.questions.length - gameState.currentQuestion;
-        remainingQuestionsElement.textContent = remaining === 1 ? 
-            '1 Question' : `${remaining} Questions`;
+        remainingQuestionsElement.textContent = remaining === 1 ? '1 Question' : `${remaining} Questions`;
     }
 
     // Start the game
     function startGame() {
-        console.log("Start game button clicked");
-        
         gameState.topic = document.getElementById('topic').value.trim();
         gameState.difficulty = document.getElementById('difficulty').value;
         gameState.questionsPerLevel = parseInt(document.getElementById('questionsPerLevel').value);
@@ -80,16 +77,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (!gameState.topic) {
             alert('Please enter a subject area');
-            return;
-        }
-        
-        console.log("Topic:", gameState.topic);
-        console.log("Difficulty:", gameState.difficulty);
-        console.log("Questions Per Level:", gameState.questionsPerLevel);
-        console.log("Total Levels:", gameState.totalLevels);
-        
-        if (!configSection || !loader || !gameArea) {
-            console.error("Missing required DOM elements");
             return;
         }
         
@@ -101,40 +88,44 @@ document.addEventListener('DOMContentLoaded', function() {
         loadLevel();
     }
 
+    // Quit the game without losing scores
+    function quitGame() {
+        gameArea.style.display = 'none';
+        configSection.style.display = 'block';
+        gameState.questions = [];
+        gameState.currentQuestion = 0;
+    }
+
     // Load level questions
     async function loadLevel() {
         currentLevelElement.textContent = `Level ${gameState.currentLevel}`;
         progressFill.style.width = ((gameState.currentLevel - 1) / gameState.totalLevels * 100) + '%';
         
         gameState.currentQuestion = 0;
-        gameState.correctAnswers = 0;
+        gameState.questions = [];
         
         try {
             loader.style.display = 'block';
-            
-            // Fetch questions from the server
+            const adjustedDifficulty = adjustDifficulty();
             const response = await fetch('/api/questions', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     topic: gameState.topic,
                     numQuestions: gameState.questionsPerLevel,
-                    difficulty: adjustDifficulty(),
-                    level: gameState.currentLevel
+                    difficulty: adjustedDifficulty,
+                    level: gameState.currentLevel,
+                    performanceScore: gameState.performanceScore
                 })
             });
 
-            if (!response.ok) {
-                throw new Error(`Server responded with status ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`Server responded with status ${response.status}`);
 
             const questionsData = await response.json();
-            
-            gameState.questions = questionsData.questions;
-            levelDescription.textContent = questionsData.level_description || 
-                `Level ${gameState.currentLevel}: The laboratory grows more ominous as you progress deeper.`;
+            gameState.questions = questionsData.questions.map(q => ({
+                ...q,
+                topic: gameState.topic
+            }));
             
             displayQuestion();
             
@@ -144,7 +135,6 @@ document.addEventListener('DOMContentLoaded', function() {
             nextLevelSection.style.display = 'none';
             door.classList.remove('door-open');
             doorText.textContent = 'LOCKED';
-            
             updateRemainingQuestions();
         } catch (error) {
             console.error("Failed to load level:", error);
@@ -154,12 +144,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Adjust difficulty based on level
+    // Adjust difficulty based on performance
     function adjustDifficulty() {
-        const baseDifficulty = gameState.difficulty;
-        if (gameState.currentLevel > 3) {
+        let baseDifficulty = gameState.difficulty;
+        const perf = gameState.performanceScore;
+        if (perf > 80) {
             if (baseDifficulty === 'easy') return 'medium';
             if (baseDifficulty === 'medium') return 'hard';
+        } else if (perf < 50 && baseDifficulty !== 'easy') {
+            if (baseDifficulty === 'hard') return 'medium';
+            if (baseDifficulty === 'medium') return 'easy';
         }
         return baseDifficulty;
     }
@@ -180,60 +174,55 @@ document.addEventListener('DOMContentLoaded', function() {
         const optionsContainer = document.createElement('div');
         optionsContainer.className = 'options';
         
-        question.options.forEach((option, index) => {
+        question.options.forEach((option) => {
             const optionElement = document.createElement('div');
             optionElement.className = 'option';
             optionElement.textContent = option;
             optionElement.setAttribute('data-option', option.charAt(0));
-            optionElement.addEventListener('click', () => selectOption(optionElement, question.correct_answer));
+            optionElement.addEventListener('click', () => selectOption(optionElement, question.correct_answer, question.explanation));
             optionsContainer.appendChild(optionElement);
         });
         
         questionElement.appendChild(optionsContainer);
         questionsContainer.appendChild(questionElement);
-        
         updateRemainingQuestions();
     }
 
-    // Handle option selection
-    function selectOption(optionElement, correctAnswer) {
-        if (optionElement.classList.contains('correct') || 
-            optionElement.classList.contains('incorrect')) {
-            return;
-        }
+    // Handle option selection with real-time feedback
+    function selectOption(optionElement, correctAnswer, explanation) {
+        if (optionElement.classList.contains('correct') || optionElement.classList.contains('incorrect')) return;
         
         const selectedOption = optionElement.getAttribute('data-option');
+        const question = gameState.questions[gameState.currentQuestion];
         const isCorrect = selectedOption === correctAnswer;
         
         optionElement.classList.add('selected');
-        
         const options = document.querySelectorAll('.option');
-        options.forEach(option => {
-            const optionLetter = option.getAttribute('data-option');
-            if (optionLetter === correctAnswer) {
-                option.classList.add('correct');
-            } else if (option === optionElement && !isCorrect) {
-                option.classList.add('incorrect');
-            }
-            option.style.pointerEvents = 'none';
+        options.forEach(opt => {
+            const optLetter = opt.getAttribute('data-option');
+            if (optLetter === correctAnswer) opt.classList.add('correct');
+            else if (opt === optionElement && !isCorrect) opt.classList.add('incorrect');
+            opt.style.pointerEvents = 'none';
         });
         
-        if (isCorrect) {
-            gameState.correctAnswers++;
-        }
         gameState.totalAnswers++;
+        if (isCorrect) gameState.correctAnswers++;
+        else gameState.incorrectTopics.push(question.topic);
+        gameState.performanceScore = (gameState.correctAnswers / gameState.totalAnswers) * 100;
+
+        const explanationDiv = document.createElement('div');
+        explanationDiv.className = 'explanation';
+        explanationDiv.textContent = explanation || "No explanation provided.";
+        questionsContainer.appendChild(explanationDiv);
         
         setTimeout(() => {
             gameState.currentQuestion++;
-            if (gameState.currentQuestion < gameState.questions.length) {
-                displayQuestion();
-            } else {
-                finishLevel();
-            }
-        }, 1500);
+            if (gameState.currentQuestion < gameState.questions.length) displayQuestion();
+            else finishLevel();
+        }, 3000);
     }
 
-    // Finish level and check if passed
+    // Finish level
     function finishLevel() {
         const successRate = gameState.correctAnswers / gameState.questions.length;
         const passed = successRate >= gameState.levelFailureThreshold;
@@ -258,7 +247,6 @@ document.addEventListener('DOMContentLoaded', function() {
             showGameOver();
             return;
         }
-        
         gameState.currentLevel++;
         gameArea.style.display = 'none';
         loader.style.display = 'block';
@@ -269,10 +257,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function retryLevel() {
         gameArea.style.display = 'none';
         loader.style.display = 'block';
+        gameState.currentQuestion = 0;
+        gameState.questions = [];
         loadLevel();
     }
 
-    // Show game over screen
+    // Show game over screen with feedback and progress chart
     function showGameOver() {
         gameArea.style.display = 'none';
         gameOverSection.style.display = 'block';
@@ -287,13 +277,91 @@ document.addEventListener('DOMContentLoaded', function() {
         statsLevels.textContent = gameState.totalLevels;
         statsCorrect.textContent = `${gameState.correctAnswers}/${gameState.totalAnswers}`;
         statsTime.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        feedbackElement.textContent = generateFeedback();
+        saveQuizData();
+        displayProgressChart();
+    }
+
+    // Generate feedback
+    function generateFeedback() {
+        const weakTopics = [...new Set(gameState.incorrectTopics)];
+        const improvement = getImprovement();
+        let feedback = '';
+        
+        if (weakTopics.length > 0) {
+            feedback += `You struggled with: ${weakTopics.join(', ')}. Review these topics for improvement. `;
+        } else {
+            feedback += `Perfect! You nailed every question. Keep it up! `;
+        }
+        
+        if (improvement !== null) {
+            feedback += `Your performance ${improvement >= 0 ? 'improved' : 'decreased'} by ${Math.abs(improvement)}% since your last quiz.`;
+        } else {
+            feedback += `First quiz on this topic—great start!`;
+        }
+        
+        return feedback;
+    }
+
+    // Calculate improvement
+    function getImprovement() {
+        const history = JSON.parse(localStorage.getItem('quizHistory')) || [];
+        const previousQuizzes = history.filter(q => q.topic === gameState.topic);
+        if (previousQuizzes.length > 0) {
+            const lastQuiz = previousQuizzes[previousQuizzes.length - 1];
+            const lastCorrectRate = lastQuiz.correctAnswers / lastQuiz.totalQuestions;
+            const currentCorrectRate = gameState.correctAnswers / gameState.totalAnswers;
+            return ((currentCorrectRate - lastCorrectRate) * 100).toFixed(2);
+        }
+        return null;
+    }
+
+    // Save quiz data
+    function saveQuizData() {
+        const quizData = {
+            topic: gameState.topic,
+            correctAnswers: gameState.correctAnswers,
+            totalQuestions: gameState.totalAnswers,
+            date: new Date().toISOString()
+        };
+        let history = JSON.parse(localStorage.getItem('quizHistory')) || [];
+        history.push(quizData);
+        localStorage.setItem('quizHistory', JSON.stringify(history));
+    }
+
+    // Display progress chart
+    function displayProgressChart() {
+        const history = JSON.parse(localStorage.getItem('quizHistory')) || [];
+        const topicHistory = history.filter(h => h.topic === gameState.topic);
+        if (topicHistory.length > 0) {
+            const ctx = document.createElement('canvas');
+            progressChart.innerHTML = '';
+            progressChart.appendChild(ctx);
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: topicHistory.map(h => h.date.split('T')[0]),
+                    datasets: [{
+                        label: 'Accuracy (%)',
+                        data: topicHistory.map(h => (h.correctAnswers / h.totalQuestions) * 100),
+                        borderColor: '#8a0303',
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: { beginAtZero: true, max: 100 }
+                    }
+                }
+            });
+        }
     }
 
     // Reset game
     function resetGame() {
         gameOverSection.style.display = 'none';
         configSection.style.display = 'block';
-        
         gameState = {
             topic: '',
             difficulty: 'medium',
@@ -305,9 +373,10 @@ document.addEventListener('DOMContentLoaded', function() {
             totalAnswers: 0,
             questions: [],
             startTime: null,
-            levelFailureThreshold: 0.5
+            levelFailureThreshold: 0.5,
+            incorrectTopics: [],
+            performanceScore: 0
         };
-        
         document.getElementById('topic').value = '';
         document.getElementById('difficulty').value = 'medium';
         document.getElementById('questionsPerLevel').value = '3';

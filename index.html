@@ -6,6 +6,7 @@
     <title>Escape The Lab</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="script.js" defer></script>
 </head>
 <body>
@@ -66,10 +67,6 @@
                     </div>
                 </div>
                 
-                <div class="level-description" id="level-description">
-                    The lights flicker as you enter the first laboratory room. Strange equipment lines the walls, and a faint hissing sound can be heard in the distance.
-                </div>
-                
                 <div class="questions-container" id="questions-container">
                     <!-- Questions will be dynamically inserted here -->
                 </div>
@@ -88,6 +85,7 @@
                 <div class="next-level" id="next-level">
                     <button id="next-level-btn"><i class="fas fa-arrow-right"></i> Enter Next Lab</button>
                 </div>
+                <button id="quit-game"><i class="fas fa-sign-out-alt"></i> Quit Game</button>
             </div>
             
             <!-- Game Over Section -->
@@ -118,7 +116,8 @@
                         <span id="stats-time">3:45</span>
                     </div>
                 </div>
-                
+                <p id="feedback"></p>
+                <div id="progress-chart"></div>
                 <button id="play-again"><i class="fas fa-redo"></i> Play Again</button>
             </div>
             
@@ -129,7 +128,7 @@
     </div>
     
     <footer>
-        Escape The Lab &copy; 2025 | Subject Matter Knowledge Testing Facility
+        Escape The Lab © 2025 | Subject Matter Knowledge Testing Facility
     </footer>
 </body>
 </html>
